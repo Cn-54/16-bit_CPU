@@ -1,32 +1,29 @@
 CC = gcc
-
 CFLAGS = -Wall -Wextra -std=c11 -Iinclude
 
-TARGET = bin/cpu
+CPU = bin/cpu
+ASSEMBLER = bin/assembler
 
-SRC = $(wildcard src/*.c)
+CPU_SRC = $(filter-out src/assemble.c,$(wildcard src/*.c))
+CPU_OBJ = $(CPU_SRC:src/%.c=build/%.o)
 
-OBJ = $(SRC:src/%.c=build/%.o)
+.PHONY: cpu assembler clean
 
+cpu: $(CPU)
 
-.PHONY: all clean run
+assembler: $(ASSEMBLER)
 
-all: $(TARGET)
-
-
-$(TARGET): $(OBJ)
+$(CPU): $(CPU_OBJ)
 	@mkdir -p bin
-	$(CC) $(OBJ) -o $@
+	$(CC) $(CPU_OBJ) -o $@
 
+$(ASSEMBLER): src/assemble.c
+	@mkdir -p bin
+	$(CC) $(CFLAGS) src/assemble.c -o $@
 
 build/%.o: src/%.c
 	@mkdir -p build
 	$(CC) $(CFLAGS) -c $< -o $@
-
-
-run: $(TARGET)
-	./$(TARGET)
-
 
 clean:
 	rm -rf build bin

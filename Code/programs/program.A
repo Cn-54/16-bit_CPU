@@ -1,0 +1,9 @@
+MOVI R0, 0x1010
+MOVI R2, 0x0000
+SYSCALL 0
+HALT
+
+DB 0x0A
+DB "Hello World"
+DB 0x0A
+DB 0x00

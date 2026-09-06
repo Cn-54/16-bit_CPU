@@ -5,12 +5,15 @@
 
 #include "Opcode.h"
 
-typedef struct {
+typedef struct
+{
     char *words[4];
+    int quoted[4];
     int count;
 } Tokens;
 
-typedef struct {
+typedef struct
+{
     const char *name;
     Opcode opcode;
 } OpcodeEntry;
@@ -67,26 +70,68 @@ static const OpcodeEntry opcodeTable[] = {
 };
 
 
-static Tokens tokenise(char *line){
+static Tokens tokenise(char line[])
+{
     Tokens t = {0};
+    char *p = line;
 
-    char *token = strtok(line, " ,\t");
-
-    while (token && t.count < 4)
+    while (*p && t.count < 4)
     {
-        for (char *p = token; *p; p++)
-            *p = toupper((unsigned char)*p);
+        // Skip separators
+        while (*p == ' ' || *p == ',' || *p == '\t')
+            p++;
 
-        t.words[t.count++] = token;
+        if (*p == '\0')
+            break;
 
-        token = strtok(NULL, " ,\t");
+        // Quoted string
+        if (*p == '"')
+        {
+            p++;
+
+            t.quoted[t.count] = 1;
+            t.words[t.count++] = p;
+
+            while (*p && *p != '"')
+                p++;
+
+            if (*p == '"')
+            {
+                *p = '\0';
+                p++;
+            }
+        }
+        else
+        {
+            // Normal token
+            t.words[t.count++] = p;
+
+            while (*p &&
+                   *p != ' ' &&
+                   *p != ',' &&
+                   *p != '\t')
+            {
+                p++;
+            }
+
+            if (*p)
+            {
+                *p = '\0';
+                p++;
+            }
+
+            // Uppercase normal token
+            for (char *c = t.words[t.count - 1]; *c; c++)
+                *c = toupper((unsigned char)*c);
+        }
     }
 
     return t;
 }
 
 
-static Opcode getOpcode(const char *str){
+static Opcode getOpcode(const char *str)
+{
     size_t count = sizeof(opcodeTable) / sizeof(opcodeTable[0]);
 
     for (size_t i = 0; i < count; i++)
@@ -99,7 +144,8 @@ static Opcode getOpcode(const char *str){
 }
 
 
-static int getRegister(const char *str){
+static int getRegister(const char *str)
+{
     if (str[0] != 'R')
         return -1;
 
@@ -112,24 +158,23 @@ static int getRegister(const char *str){
 }
 
 
-static int getValue(const char *str){
+static int getValue(const char *str)
+{
     return (int)strtol(str, NULL, 0);
 }
 
 
-static void emit(FILE *file, int op, int dest, int src1, int src2){
-    fprintf(
-        file,
-        "%02X %02X %02X %02X\n",
-        op,
-        dest,
-        src1,
-        src2
-    );
+static void emit(FILE *file, int op, int dest, int src1, int src2)
+{
+    fputc(op, file);
+    fputc(dest, file);
+    fputc(src1, file);
+    fputc(src2, file);
 }
 
 
-static int assemble(const char *input, const char *output){
+static int assemble(const char *input, const char *output)
+{
     FILE *in = fopen(input, "r");
 
     if (!in)
@@ -138,7 +183,8 @@ static int assemble(const char *input, const char *output){
         return 1;
     }
 
-    FILE *out = fopen(output, "w");
+    // Binary output
+    FILE *out = fopen(output, "wb");
 
     if (!out)
     {
@@ -151,12 +197,48 @@ static int assemble(const char *input, const char *output){
 
     while (fgets(line, sizeof(line), in))
     {
+        // Remove newline
         line[strcspn(line, "\r\n")] = '\0';
 
         Tokens t = tokenise(line);
 
         if (t.count == 0)
             continue;
+
+
+        /*
+         * DB
+         *
+         * DB 0x0A
+         * DB 65
+         * DB "Hello World"
+         */
+        if (strcmp(t.words[0], "DB") == 0)
+        {
+            if (t.count < 2)
+            {
+                printf("DB requires an operand\n");
+                continue;
+            }
+
+            // String
+            if (t.quoted[1])
+            {
+                for (char *p = t.words[1]; *p; p++)
+                    fputc((unsigned char)*p, out);
+            }
+
+            // Single byte
+            else
+            {
+                int value = getValue(t.words[1]);
+
+                fputc(value & 0xFF, out);
+            }
+
+            continue;
+        }
+
 
         Opcode op = getOpcode(t.words[0]);
 
@@ -166,9 +248,11 @@ static int assemble(const char *input, const char *output){
             continue;
         }
 
+
         int dest = 0;
         int src1 = 0;
         int src2 = 0;
+
 
         switch (op)
         {
@@ -185,7 +269,9 @@ static int assemble(const char *input, const char *output){
             case INC:
             case DEC:
             case PUTC:
+
                 dest = getRegister(t.words[1]);
+
                 break;
 
 
@@ -196,8 +282,10 @@ static int assemble(const char *input, const char *output){
             case LOADBIND:
             case STOREBIND:
             case CMP:
+
                 dest = getRegister(t.words[1]);
                 src1 = getRegister(t.words[2]);
+
                 break;
 
 
@@ -209,90 +297,96 @@ static int assemble(const char *input, const char *output){
             case AND:
             case OR:
             case XOR:
+
                 dest = getRegister(t.words[1]);
                 src1 = getRegister(t.words[2]);
                 src2 = getRegister(t.words[3]);
+
                 break;
 
 
             // Register + immediate
             case MOVI:
+            {
                 dest = getRegister(t.words[1]);
 
-                {
-                    int value = getValue(t.words[2]);
+                int value = getValue(t.words[2]);
 
-                    src1 = (value >> 8) & 0xFF;
-                    src2 = value & 0xFF;
-                }
+                src1 = (value >> 8) & 0xFF;
+                src2 = value & 0xFF;
 
                 break;
+            }
 
 
             // Direct memory access
             case LOAD:
+            {
                 dest = getRegister(t.words[1]);
 
-                {
-                    int address = getValue(t.words[2]);
+                int address = getValue(t.words[2]);
 
-                    src1 = (address >> 8) & 0xFF;
-                    src2 = address & 0xFF;
-                }
+                src1 = (address >> 8) & 0xFF;
+                src2 = address & 0xFF;
 
                 break;
+            }
 
 
             case STORE:
-                {
-                    int address = getValue(t.words[1]);
+            {
+                int address = getValue(t.words[1]);
 
-                    dest = (address >> 8) & 0xFF;
-                    src1 = address & 0xFF;
-                }
+                dest = (address >> 8) & 0xFF;
+                src1 = address & 0xFF;
 
                 src2 = getRegister(t.words[2]);
 
                 break;
+            }
 
 
             // Byte direct memory access
             case LOADB:
+            {
                 dest = getRegister(t.words[1]);
 
-                {
-                    int address = getValue(t.words[2]);
+                int address = getValue(t.words[2]);
 
-                    src1 = (address >> 8) & 0xFF;
-                    src2 = address & 0xFF;
-                }
+                src1 = (address >> 8) & 0xFF;
+                src2 = address & 0xFF;
 
                 break;
+            }
 
 
             case STOREB:
-                {
-                    int address = getValue(t.words[1]);
+            {
+                int address = getValue(t.words[1]);
 
-                    dest = (address >> 8) & 0xFF;
-                    src1 = address & 0xFF;
-                }
+                dest = (address >> 8) & 0xFF;
+                src1 = address & 0xFF;
 
                 src2 = getRegister(t.words[2]);
 
                 break;
+            }
 
 
             // Logic NOT
             case NOT:
+
                 dest = getRegister(t.words[1]);
                 src1 = getRegister(t.words[2]);
+
                 break;
 
 
             // System call
             case SYSCALL:
+
                 src1 = getValue(t.words[1]);
+
                 break;
 
 
@@ -303,19 +397,22 @@ static int assemble(const char *input, const char *output){
             case JG:
             case JL:
             case CALL:
-                {
-                    int offset = getValue(t.words[1]);
+            {
+                int offset = getValue(t.words[1]);
 
-                    src1 = (offset >> 8) & 0xFF;
-                    src2 = offset & 0xFF;
-                }
+                src1 = (offset >> 8) & 0xFF;
+                src2 = offset & 0xFF;
 
                 break;
+            }
 
 
             default:
-                printf("Assembler does not support opcode: %s\n",
-                       t.words[0]);
+
+                printf(
+                    "Assembler does not support opcode: %s\n",
+                    t.words[0]
+                );
 
                 fclose(in);
                 fclose(out);
@@ -323,8 +420,10 @@ static int assemble(const char *input, const char *output){
                 return 1;
         }
 
+
         emit(out, op, dest, src1, src2);
     }
+
 
     fclose(in);
     fclose(out);
@@ -337,7 +436,7 @@ int main(int argc, char *argv[])
 {
     if (argc < 3)
     {
-        printf("usage: ./assemble <program.A> <output.M>\n");
+        printf("usage: ./assembler <program.A> <output.bin>\n");
         return 1;
     }
 
