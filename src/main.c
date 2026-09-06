@@ -12,6 +12,8 @@ int main(){
     Load_Code(mem, "Code/vector_table/vec_table.bin", VECTORTABLE_START);
     Load_Code(mem, "Code/subroutines/print/print.bin", SUBROUTINES_START);
     Load_Code(mem, "Code/subroutines/strlen/strlen.bin", SUBROUTINES_START*2);
+    Load_Code(mem, "Code/subroutines/atoi/atoi.bin", SUBROUTINES_START*3);
+    Load_Code(mem, "Code/subroutines/itoa/itoa.bin", SUBROUTINES_START*4);
     Load_Code(mem, "Code/programs/program.bin", PROGRAM_START);
 
     // cpu->FLAGS |= FLAG_D;

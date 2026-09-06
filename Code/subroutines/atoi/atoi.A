@@ -1,0 +1,39 @@
+; R0 = string address
+; R1-R4 = scratch
+;
+; Returns:
+; R0 = integer
+
+ATOI:
+    MOV R1, R0          ; Current character pointer
+
+    MOVI R2, 0          ; Result
+    MOVI R3, 48         ; '0'
+    MOVI R4, 0          ; Null terminator
+
+LOOP:
+    LOADBIND R0, R1
+
+    CMP R0, R4
+    JE DONE
+
+    ; character - '0'
+    SUB R0, R0, R3
+
+    ; result * 10
+    MOVI R4, 10
+    MUL R2, R2, R4
+
+    ; add digit
+    ADD R2, R2, R0
+
+    INC R1
+
+    MOVI R3, 48
+    MOVI R4, 0
+
+    JMP LOOP
+
+DONE:
+    MOV R0, R2
+    RET
