@@ -20,43 +20,36 @@ void Destroy_CPU(CPU *cpu){
 }
 
 static void Debug_Instruction(CPU *cpu, INS *instruction){
-    printf("\n");
-    printf("########################################\n");
+    printf(
+        "[%04X] %02X %02X,%02X,%02X | "
+        "R0=%04X R1=%04X R2=%04X R3=%04X | "
+        "SP=%04X | FLAGS=%04X [",
+        
+        cpu->PC - 4,
+        instruction->op,
+        instruction->DEST,
+        instruction->SRC1,
+        instruction->SRC2,
 
-    printf("PC    : 0x%04X\n", cpu->PC - 4);
-    printf("OP    : 0x%02X\n", instruction->op);
-    printf("DEST  : 0x%02X\n", instruction->DEST);
-    printf("SRC1  : 0x%02X\n", instruction->SRC1);
-    printf("SRC2  : 0x%02X\n", instruction->SRC2);
+        cpu->R[0],
+        cpu->R[1],
+        cpu->R[2],
+        cpu->R[3],
 
-    printf("\nREGISTERS:\n");
+        cpu->SP,
+        cpu->FLAGS
+    );
 
-    for (int i = 0; i < REGISTER_COUNT; i++)
-    {
-        printf("R%-2d: 0x%04X", i, cpu->R[i]);
+    if (cpu->FLAGS & FLAG_Z) printf("Z");
+    if (cpu->FLAGS & FLAG_G) printf("G");
+    if (cpu->FLAGS & FLAG_L) printf("L");
+    if (cpu->FLAGS & FLAG_N) printf("N");
+    if (cpu->FLAGS & FLAG_V) printf("V");
+    if (cpu->FLAGS & FLAG_U) printf("U");
+    if (cpu->FLAGS & FLAG_H) printf("H");
+    if (cpu->FLAGS & FLAG_D) printf("D");
 
-        if (i % 4 == 3)
-            printf("\n");
-        else
-            printf("    ");
-    }
-
-    printf("\nSPECIAL:\n");
-    printf("SP    : 0x%04X\n", cpu->SP);
-    printf("FLAGS : 0x%04X\n", cpu->FLAGS);
-
-    printf("\nFLAGS:\n");
-    printf("Z=%d  G=%d  L=%d  N=%d  V=%d  U=%d  H=%d  D=%d\n",
-           !!(cpu->FLAGS & FLAG_Z),
-           !!(cpu->FLAGS & FLAG_G),
-           !!(cpu->FLAGS & FLAG_L),
-           !!(cpu->FLAGS & FLAG_N),
-           !!(cpu->FLAGS & FLAG_V),
-           !!(cpu->FLAGS & FLAG_U),
-           !!(cpu->FLAGS & FLAG_H),
-           !!(cpu->FLAGS & FLAG_D));
-
-    printf("########################################\n");
+    printf("]\n");
 }
 
 void FDE(CPU *cpu, Memory *mem){

@@ -13,7 +13,7 @@ int main(){
     Load_Code(mem, "Code/subroutines/print/print.bin", SUBROUTINES_START);
     Load_Code(mem, "Code/programs/program.bin", PROGRAM_START);
 
-    cpu->PC = PROGRAM_START;
+    cpu->FLAGS |= FLAG_D;
 
     while (!(cpu->FLAGS & FLAG_H)){
         FDE(cpu,mem);
