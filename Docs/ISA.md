@@ -186,6 +186,7 @@ jumps backwards 8 bytes from the address of the next instruction.
 | Opcode | Instruction | Description        |
 | ------ | ----------- | ------------------ |
 | `0x60` | `PUTC`      | Output a character |
+| `0x61` | `INP`      | Reads a character from the terminal |
 
 `PUTC` outputs the low 8 bits of the specified register.
 
