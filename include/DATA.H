@@ -18,6 +18,7 @@
 #define FLAG_V (1 << 4) // overflow flag
 #define FLAG_U (1 << 5) // underflow flag
 #define FLAG_H (1 << 6) // halted flag
+#define FLAG_D (1 << 7) // debug flag
 
 #define VECTORTABLE_START 0x0000
 #define SUBROUTINES_START 0x0100

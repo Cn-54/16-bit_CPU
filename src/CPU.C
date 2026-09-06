@@ -7,13 +7,57 @@
 #include <stdlib.h>
 
 CPU *Create_CPU(void){
-    return calloc(1, sizeof(CPU));
+    CPU *cpu = calloc(1, sizeof(CPU));
+    cpu->PC = PROGRAM_START;
+    cpu->SP = 0xFFFF;
+    cpu->FLAGS = 0;
+
+    return cpu;
 }
 
 void Destroy_CPU(CPU *cpu){
     free(cpu);
 }
 
+static void Debug_Instruction(CPU *cpu, INS *instruction){
+    printf("\n");
+    printf("########################################\n");
+
+    printf("PC    : 0x%04X\n", cpu->PC - 4);
+    printf("OP    : 0x%02X\n", instruction->op);
+    printf("DEST  : 0x%02X\n", instruction->DEST);
+    printf("SRC1  : 0x%02X\n", instruction->SRC1);
+    printf("SRC2  : 0x%02X\n", instruction->SRC2);
+
+    printf("\nREGISTERS:\n");
+
+    for (int i = 0; i < REGISTER_COUNT; i++)
+    {
+        printf("R%-2d: 0x%04X", i, cpu->R[i]);
+
+        if (i % 4 == 3)
+            printf("\n");
+        else
+            printf("    ");
+    }
+
+    printf("\nSPECIAL:\n");
+    printf("SP    : 0x%04X\n", cpu->SP);
+    printf("FLAGS : 0x%04X\n", cpu->FLAGS);
+
+    printf("\nFLAGS:\n");
+    printf("Z=%d  G=%d  L=%d  N=%d  V=%d  U=%d  H=%d  D=%d\n",
+           !!(cpu->FLAGS & FLAG_Z),
+           !!(cpu->FLAGS & FLAG_G),
+           !!(cpu->FLAGS & FLAG_L),
+           !!(cpu->FLAGS & FLAG_N),
+           !!(cpu->FLAGS & FLAG_V),
+           !!(cpu->FLAGS & FLAG_U),
+           !!(cpu->FLAGS & FLAG_H),
+           !!(cpu->FLAGS & FLAG_D));
+
+    printf("########################################\n");
+}
 
 void FDE(CPU *cpu, Memory *mem){
     INS instruction;
@@ -25,6 +69,10 @@ void FDE(CPU *cpu, Memory *mem){
 
     uint16_t addressA = instruction.DEST << 8 | instruction.SRC1;
     uint16_t addressB = instruction.SRC1 << 8 | instruction.SRC2;
+
+    if (cpu->FLAGS & FLAG_D) {
+        Debug_Instruction(cpu, &instruction);
+    }
 
     cpu->PC += 4;
 
