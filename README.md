@@ -15,7 +15,7 @@ The project includes a custom instruction set, assembler, byte-addressable memor
 * Vector table and system calls
 * Assembly subroutines for `PRINT`, `STRLEN`, `ATOI` and `ITOA`
 
-See the [ISA documentation](docs/ISA.md) for the full instruction set and architecture.
+See the [ISA documentation](Docs/ISA.md) for the full instruction set and architecture.
 
 ## Usage
 
