@@ -13,17 +13,6 @@ void Destroy_CPU(CPU *cpu){
     free(cpu);
 }
 
-uint16_t load_word(Memory *mem, uint16_t address)
-{
-    return ((uint16_t)mem->data[address] << 8) |
-           mem->data[address + 1];
-}
-
-void store_word(Memory *mem, uint16_t address, uint16_t value)
-{
-    mem->data[address]     = value >> 8;
-    mem->data[address + 1] = value & 0xFF;
-}
 
 void FDE(CPU *cpu, Memory *mem){
     INS instruction;

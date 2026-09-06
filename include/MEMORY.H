@@ -1,5 +1,5 @@
-#ifndef MEMORY_H_
-#define MEMORY_H_
+#ifndef MEMORY_H
+#define MEMORY_H
 
 #include <stdint.h>
 #include "DATA.h"
@@ -11,6 +11,10 @@ typedef struct memory {
 Memory *Create_Memory(void);
 void Destroy_Memory(Memory *mem);
 
-void Load_Memory(uint16_t address,uint8_t *data);
+uint8_t load_byte(Memory *mem, uint16_t address);
+uint16_t load_word(Memory *mem, uint16_t address);
+
+void store_byte(Memory *mem, uint16_t address, uint8_t value);
+void store_word(Memory *mem, uint16_t address, uint16_t value);
 
 #endif
