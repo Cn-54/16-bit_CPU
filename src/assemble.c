@@ -128,6 +128,11 @@ static void remove_comment(char *line)
     }
 }
 
+static int isOrg(Tokens *t){
+    return t->count >= 2 &&
+           strcmp(t->words[0], ".ORG") == 0;
+}
+
 
 /* ---------------------------------------------------------
  * Tokenisation
@@ -367,7 +372,7 @@ static int firstPass(const char *input)
 
     char line[256];
 
-    int address = PROGRAM_START;
+    int address = 0;
 
     while (fgets(line, sizeof(line), in))
     {
@@ -417,6 +422,21 @@ static int firstPass(const char *input)
         }
 
         Tokens t = tokenise(line);
+
+        if (isOrg(&t))
+        {
+            int org = getValue(t.words[1]);
+
+            if (org < 0 || org > 0xFFFF)
+            {
+                printf("Invalid .ORG address: %s\n", t.words[1]);
+                fclose(in);
+                return 0;
+            }
+
+            address = org;
+            continue;
+        }
 
         address += getLineSize(&t);
     }
@@ -546,6 +566,20 @@ static int secondPass(const char *input,
 
         Tokens t = tokenise(line);
 
+        if (isOrg(&t)){
+            int org = getValue(t.words[1]);
+
+            if (org < 0 || org > 0xFFFF)
+            {
+                printf("Invalid .ORG address: %s\n", t.words[1]);
+                fclose(in);
+                fclose(out);
+                return 0;
+            }
+
+            address = org;
+            continue;
+        }
         if (t.count == 0)
             continue;
 
