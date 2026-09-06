@@ -1,0 +1,12 @@
+.ORG 0x1000
+
+MOVI R0, 0x2000     ; Current buffer position
+MOV R3, R0          ; Save start of buffer
+
+SYSCALL 4           ; READLINE
+
+MOVI R0, 0x2000     ; Reset to start of buffer
+
+SYSCALL 0           ; PRINT
+
+HALT

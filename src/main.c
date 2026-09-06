@@ -4,28 +4,50 @@
 #include "loader.h"
 #include "memory.h"
 #include <stdio.h>
+#include <string.h>
 
-int main(int argc, char *argv[])
-{
-    if (argc != 2)
+int main(int argc, char *argv[]){
+    int debug = 0;
+    char *program = NULL;
+
+    for (int i = 1; i < argc; i++)
     {
-        printf("Usage: %s <program.bin>\n", argv[0]);
+        if (strcmp(argv[i], "-D") == 0)
+        {
+            debug = 1;
+        }
+        else if (program == NULL)
+        {
+            program = argv[i];
+        }
+        else
+        {
+            printf("Usage: %s [-D] <program.bin>\n", argv[0]);
+            return 1;
+        }
+    }
+
+    if (program == NULL)
+    {
+        printf("Usage: %s [-D] <program.bin>\n", argv[0]);
         return 1;
     }
+
     CPU *cpu = Create_CPU();
     Memory *mem = Create_Memory();
 
-    // load vector table and subroutines into memory
+    // load vector table into memory
     Load_Code(mem, "Code/vector_table/vec_table.bin", VECTORTABLE_START);
-    Load_Code(mem, "Code/subroutines/print/print.bin", SUBROUTINES_START);
-    Load_Code(mem, "Code/subroutines/strlen/strlen.bin", SUBROUTINES_START*2);
-    Load_Code(mem, "Code/subroutines/atoi/atoi.bin", SUBROUTINES_START*3);
-    Load_Code(mem, "Code/subroutines/itoa/itoa.bin", SUBROUTINES_START*4);
+
+    // load subroutines into memory
+    Load_Subroutines(mem,SUBROUTINES_START);
     
     // load user program into memory
     Load_Code(mem,argv[1],PROGRAM_START);
 
-    // cpu->FLAGS |= FLAG_D;
+     if (debug){
+        cpu->FLAGS |= FLAG_D;
+    }
 
     while (!(cpu->FLAGS & FLAG_H)){
         FDE(cpu,mem);

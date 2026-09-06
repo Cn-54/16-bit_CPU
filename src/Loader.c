@@ -17,3 +17,11 @@ void Load_Code(Memory *mem, const char *filename, uint16_t address){
 
     fclose(file);
 }
+
+void Load_Subroutines(Memory *mem, uint16_t address){
+    Load_Code(mem, "Code/subroutines/print/print.bin", address);
+    Load_Code(mem, "Code/subroutines/strlen/strlen.bin", address*2);
+    Load_Code(mem, "Code/subroutines/atoi/atoi.bin", address*3);
+    Load_Code(mem, "Code/subroutines/itoa/itoa.bin", address*4);
+    Load_Code(mem, "Code/subroutines/readline/readline.bin", address*5);
+}

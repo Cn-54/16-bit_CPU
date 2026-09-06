@@ -4,5 +4,6 @@
 #include "memory.h"
 
 void Load_Code(Memory *mem, const char *filename, uint16_t address);
+void Load_Subroutines(Memory *mem, uint16_t address);
 
 #endif

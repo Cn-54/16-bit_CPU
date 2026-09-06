@@ -50,6 +50,7 @@ typedef enum {
 
     // IO
     PUTC     = 0x60,
+    INP      = 0x61,
 
 } Opcode;
 

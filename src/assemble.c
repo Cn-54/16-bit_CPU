@@ -3,9 +3,7 @@
 #include <ctype.h>
 #include <stdlib.h>
 #include <stdint.h>
-
-#include "DATA.h"
-#include "Opcode.h"
+#include "opcode.h"
 
 
 #define MAX_LABELS 256
@@ -83,7 +81,8 @@ static const OpcodeEntry opcodeTable[] = {
     {"RET",       RET},
 
     /* I/O */
-    {"PUTC",      PUTC}
+    {"PUTC",      PUTC},
+    {"INP",      INP}
 };
 
 
@@ -645,6 +644,7 @@ static int secondPass(const char *input,
 
             case PUSH:
             case POP:
+            case INP:
             case PUTC:
 
                 src1 = getRegister(t.words[1]);

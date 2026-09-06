@@ -1,0 +1,43 @@
+READLINE:
+    INP R1
+
+    ; ENTER
+    MOVI R2, 10
+    CMP R1, R2
+    JE DONE
+
+    ; BACKSPACE
+    MOVI R2, 8
+    CMP R1, R2
+    JE BACKSPACE
+
+    MOVI R2, 127
+    CMP R1, R2
+    JE BACKSPACE
+
+    ; Normal character
+    STOREBIND R0, R1
+    INC R0
+
+    JMP READLINE
+
+
+BACKSPACE:
+    ; Already at beginning?
+    CMP R0, R3
+    JE READLINE
+
+    ; Move back one character
+    DEC R0
+
+    ; Delete character
+    MOVI R1, 0
+    STOREBIND R0, R1
+
+    JMP READLINE
+
+
+DONE:
+    MOVI R1, 0
+    STOREBIND R0, R1
+    RET

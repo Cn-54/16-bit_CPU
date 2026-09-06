@@ -239,5 +239,9 @@ void FDE(CPU *cpu, Memory *mem){
                 ((uint16_t)instruction.SRC1 << 8) |
                 instruction.SRC2;
             break;
+        case INP:
+            cpu->R[instruction.SRC1] = (uint16_t)getchar();
+            break;
         }
+
 }

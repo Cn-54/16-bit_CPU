@@ -1,0 +1,14 @@
+PRINT:
+    MOVI R2, 0
+
+LOOP:
+    LOADBIND R1, R0
+    CMP R1, R2
+    JE END
+
+    PUTC R1
+    INC R0
+    JMP LOOP
+
+END:
+    RET
