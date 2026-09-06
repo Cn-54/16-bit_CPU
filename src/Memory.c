@@ -1,15 +1,19 @@
 #include "memory.h"
 
 #include "memory.h"
+#include <stdio.h>
 #include <stdlib.h>
 
-Memory *Create_Memory(void)
-{
-    return calloc(1, sizeof(Memory));
+Memory *Create_Memory(void){
+    Memory *mem = calloc(1, sizeof(Memory));
+    if(mem == NULL){
+        printf(" [!] error creating memory");
+        return NULL;
+    }
+    return mem;
 }
 
-void Destroy_Memory(Memory *mem)
-{
+void Destroy_Memory(Memory *mem){
     free(mem);
 }
 

@@ -8,6 +8,10 @@
 
 CPU *Create_CPU(void){
     CPU *cpu = calloc(1, sizeof(CPU));
+    if(cpu == NULL){
+        printf(" [!] error creating cpu");
+        return NULL;
+    }
     cpu->PC = PROGRAM_START;
     cpu->SP = 0xFFFF;
     cpu->FLAGS = 0;
@@ -68,6 +72,11 @@ void FDE(CPU *cpu, Memory *mem){
     }
 
     cpu->PC += 4;
+
+    if(cpu->PC > MEMORY_SIZE - MAX_STACK){
+        printf(" [!] CPU ERROR: Memory limits exceeded");
+        cpu->FLAGS |= FLAG_H;
+    }
 
     switch (instruction.op) {
         case (NOP):
@@ -241,6 +250,10 @@ void FDE(CPU *cpu, Memory *mem){
             break;
         case INP:
             cpu->R[instruction.SRC1] = (uint16_t)getchar();
+            break;
+        default:
+            printf(" [!] CPU ERROR: UNKNOWN OPCODE %d",instruction.op);
+            cpu->FLAGS |= FLAG_H;
             break;
         }
 

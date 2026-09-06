@@ -5,6 +5,7 @@ void Load_Code(Memory *mem, const char *filename, uint16_t address){
     FILE *file = fopen(filename, "rb");
 
     if (file == NULL) {
+        printf(" [!] error loading code");
         return;
     }
 
