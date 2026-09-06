@@ -1,8 +1,94 @@
-MOVI R0, MESSAGE
+.ORG 0x1000
+
+; ==========================================
+; TEST 1: PRINT
+; ==========================================
+
+MOVI R0, PRINT_MSG
 MOVI R2, 0
 SYSCALL 0
 
+MOVI R1, 10
+PUTC R1
+
+
+; ==========================================
+; TEST 2: STRLEN
+; ==========================================
+
+MOVI R0, LENGTH_MSG
+SYSCALL 1
+
+; R1 = length
+; Convert length to ASCII
+MOVI R3, 48
+ADD R1, R1, R3
+PUTC R1
+
+MOVI R1, 10
+PUTC R1
+
+
+; ==========================================
+; TEST 3: ATOI
+; ==========================================
+
+MOVI R0, NUMBER_STRING
+SYSCALL 2
+
+; R0 = 12345
+; Save result
+MOV R4, R0
+
+; Convert integer back to string using ITOA
+MOVI R1, BUFFER
+MOV R0, R4
+SYSCALL 3
+
+; Print resulting string
+MOV R0, R1
+MOVI R2, 0
+SYSCALL 0
+
+MOVI R1, 10
+PUTC R1
+
+
+; ==========================================
+; TEST 4: ITOA
+; ==========================================
+
+MOVI R0, 54321
+MOVI R1, BUFFER
+SYSCALL 3
+
+MOV R0, R1
+MOVI R2, 0
+SYSCALL 0
+
+MOVI R1, 10
+PUTC R1
+
+
+; ==========================================
+; DONE
+; ==========================================
+
 HALT
 
-MESSAGE:
-DB "PRINT TEST\n"
+
+; ==========================================
+; DATA
+; ==========================================
+
+PRINT_MSG:
+    DB "PRINT works"
+
+LENGTH_MSG:
+    DB "Hello"
+
+NUMBER_STRING:
+    DB "12345"
+
+BUFFER:
+    DB "\0\0\0\0\0\0"
