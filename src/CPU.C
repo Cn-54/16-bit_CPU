@@ -25,7 +25,7 @@ static void Debug_Instruction(CPU *cpu, INS *instruction){
         "R0=%04X R1=%04X R2=%04X R3=%04X | "
         "SP=%04X | FLAGS=%04X [",
         
-        cpu->PC - 4,
+        cpu->PC,
         instruction->op,
         instruction->DEST,
         instruction->SRC1,
@@ -75,18 +75,19 @@ void FDE(CPU *cpu, Memory *mem){
         case HALT:
             cpu->FLAGS |= FLAG_H;
             break;
-        case SYSCALL:
+        case SYSCALL: {
             cpu->SP -= WORD_SIZE;
 
             uint16_t return_address = cpu->PC;
 
-            mem->data[cpu->SP]     = return_address >> 8;
-            mem->data[cpu->SP + 1] = return_address & 0xFF;
+            store_word(mem, cpu->SP, return_address);
 
             uint16_t vector_address = instruction.SRC1 * WORD_SIZE;
+            uint16_t handler = load_word(mem, vector_address);
 
-            cpu->PC = load_word(mem, vector_address);
+            cpu->PC = handler;
             break;
+        }
         case MOV:
             cpu->R[instruction.DEST] = cpu->R[instruction.SRC1];
             break;
@@ -223,6 +224,7 @@ void FDE(CPU *cpu, Memory *mem){
         case LOADBIND:
             cpu->R[instruction.DEST] =
                 load_byte(mem, cpu->R[instruction.SRC1]);
+
             break;
 
         case STOREBIND:

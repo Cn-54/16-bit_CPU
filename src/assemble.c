@@ -304,16 +304,16 @@ static int assemble(const char *input, const char *output)
 
 
             // One register
-            case PUSH:
-            case POP:
             case INC:
             case DEC:
-            case PUTC:
-
                 dest = getRegister(t.words[1]);
-
                 break;
 
+            case PUSH:
+            case POP:
+            case PUTC:
+                src1 = getRegister(t.words[1]);
+                break;
 
             // Two registers
             case MOV:
@@ -321,11 +321,13 @@ static int assemble(const char *input, const char *output)
             case STOREIND:
             case LOADBIND:
             case STOREBIND:
-            case CMP:
-
                 dest = getRegister(t.words[1]);
                 src1 = getRegister(t.words[2]);
+                break;
 
+            case CMP:
+                src1 = getRegister(t.words[1]);
+                src2 = getRegister(t.words[2]);
                 break;
 
 
