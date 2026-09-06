@@ -205,14 +205,6 @@ static int assemble(const char *input, const char *output)
         if (t.count == 0)
             continue;
 
-
-        /*
-         * DB
-         *
-         * DB 0x0A
-         * DB 65
-         * DB "Hello World"
-         */
         if (strcmp(t.words[0], "DB") == 0)
         {
             if (t.count < 2)
@@ -224,8 +216,56 @@ static int assemble(const char *input, const char *output)
             // String
             if (t.quoted[1])
             {
-                for (char *p = t.words[1]; *p; p++)
-                    fputc((unsigned char)*p, out);
+                char *p = t.words[1];
+
+                while (*p)
+                {
+                    if (*p == '\\')
+                    {
+                        p++;
+
+                        switch (*p)
+                        {
+                            case 'n':
+                                fputc('\n', out);
+                                break;
+
+                            case 't':
+                                fputc('\t', out);
+                                break;
+
+                            case 'r':
+                                fputc('\r', out);
+                                break;
+
+                            case '\\':
+                                fputc('\\', out);
+                                break;
+
+                            case '"':
+                                fputc('"', out);
+                                break;
+
+                            case '0':
+                                fputc('\0', out);
+                                break;
+
+                            default:
+                                fputc('\\', out);
+                                fputc(*p, out);
+                                break;
+                        }
+                    }
+                    else
+                    {
+                        fputc((unsigned char)*p, out);
+                    }
+
+                    p++;
+                }
+
+                // Automatically terminate every string
+                fputc('\0', out);
             }
 
             // Single byte
