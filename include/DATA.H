@@ -7,8 +7,9 @@
 #define MAX_STACK      256
 #define REGISTER_COUNT 16
 
-#define PAGE_SIZE 256
-#define PAGE_COUNT 256
+#define PAGE_SIZE            256
+#define PAGE_COUNT           256
+#define PAGES_PER_SUBROUTINE 1
 
 #define FLAG_Z (1 << 0) // zero flag
 #define FLAG_G (1 << 1) // greater than flag

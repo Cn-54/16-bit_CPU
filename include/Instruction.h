@@ -1,7 +1,7 @@
 #ifndef INSTRUCTION_H_
 #define INSTRUCTION_H_
 
-#include "Opcode.h"
+#include "opcode.h"
 #include <stdint.h>
 
 typedef struct {

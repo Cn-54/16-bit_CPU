@@ -9,11 +9,20 @@ typedef enum {
     SYSCALL  = 0x02,
 
     // Data operations
-    MOV      = 0x10,
-    LOAD     = 0x11,
-    STORE    = 0x12,
-    PUSH     = 0x13,
-    POP      = 0x14,
+    MOV    = 0x10,
+    LOAD   = 0x11,
+    STORE  = 0x12,
+    PUSH   = 0x13,
+    POP    = 0x14,
+    MOVI   = 0x15,
+    LOADB  = 0x16,
+    STOREB = 0x17,
+    INC    = 0x18,
+    DEC    = 0x19,
+    LOADIND   = 0x1A,
+    STOREIND  = 0x1B,
+    LOADBIND  = 0x1C,
+    STOREBIND = 0x1D,
 
     // Arithmetic
     ADD      = 0x20,
@@ -37,7 +46,10 @@ typedef enum {
     JG       = 0x53,
     JL       = 0x54,
     CALL     = 0x55,
-    RET      = 0x56
+    RET      = 0x56,
+
+    // IO
+    PUTC     = 0x60,
 
 } Opcode;
 

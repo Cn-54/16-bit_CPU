@@ -1,8 +1,9 @@
-#include "CPU.h"
-#include "DATA.h"
-#include "Instruction.h"
-#include "MEMORY.h"
-#include "Opcode.h"
+#include "cpu.h"
+#include "data.h"
+#include "instruction.h"
+#include "memory.h"
+#include "opcode.h"
+#include <stdio.h>
 #include <stdlib.h>
 
 CPU *Create_CPU(void){
@@ -78,7 +79,7 @@ void FDE(CPU *cpu, Memory *mem){
             cpu->R[instruction.DEST] = cpu->R[instruction.SRC1] & cpu->R[instruction.SRC2];
             break;
         case OR:
-        cpu->R[instruction.DEST] = cpu->R[instruction.SRC1] | cpu->R[instruction.SRC2];
+            cpu->R[instruction.DEST] = cpu->R[instruction.SRC1] | cpu->R[instruction.SRC2];
             break;
         case XOR:
             cpu->R[instruction.DEST] = cpu->R[instruction.SRC1] ^ cpu->R[instruction.SRC2];
@@ -91,6 +92,7 @@ void FDE(CPU *cpu, Memory *mem){
 
             uint16_t valA = cpu->R[instruction.SRC1];
             uint16_t valB = cpu->R[instruction.SRC2];
+
             if(valA > valB){
                 cpu->FLAGS |= FLAG_G;
             }else if(valA < valB){
@@ -146,5 +148,53 @@ void FDE(CPU *cpu, Memory *mem){
 
             break;
         }
-    }
+        case LOADB:
+            cpu->R[instruction.DEST] = load_byte(mem, addressB);
+            break;
+        case STOREB:
+            store_byte(mem, addressA, cpu->R[instruction.SRC2]);
+            break;
+        case INC:
+            cpu->R[instruction.DEST] ++;
+            break;
+        case DEC:
+            cpu->R[instruction.DEST] --;
+            break;
+        case PUTC:
+
+            putchar((char)cpu->R[instruction.SRC1]);
+            fflush(stdout);
+            break;
+
+        case LOADIND:
+            cpu->R[instruction.DEST] =
+                load_word(mem, cpu->R[instruction.SRC1]);
+            break;
+
+        case STOREIND:
+            store_word(
+                mem,
+                cpu->R[instruction.DEST],
+                cpu->R[instruction.SRC1]
+            );
+            break;
+
+        case LOADBIND:
+            cpu->R[instruction.DEST] =
+                load_byte(mem, cpu->R[instruction.SRC1]);
+            break;
+
+        case STOREBIND:
+            store_byte(
+                mem,
+                cpu->R[instruction.DEST],
+                (uint8_t)cpu->R[instruction.SRC1]
+            );
+            break;
+        case MOVI:
+            cpu->R[instruction.DEST] =
+                ((uint16_t)instruction.SRC1 << 8) |
+                instruction.SRC2;
+            break;
+        }
 }

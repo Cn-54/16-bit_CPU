@@ -2,7 +2,7 @@
 #define MEMORY_H
 
 #include <stdint.h>
-#include "DATA.h"
+#include "data.h"
 
 typedef struct memory {
     uint8_t data[MEMORY_SIZE];

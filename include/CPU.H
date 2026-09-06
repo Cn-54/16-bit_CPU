@@ -2,8 +2,8 @@
 #define CPU_H
 
 #include <stdint.h>
-#include "DATA.h"
-#include "MEMORY.h"
+#include "data.h"
+#include "memory.h"
 
 typedef struct cpu {
     uint16_t R[REGISTER_COUNT]; // R0-R15
