@@ -5,14 +5,9 @@
 .ORG 0x1000
 
 START:
-
-    ; Read terminal input
-    MOVI R1, 0
-    INP R2, R1
-
     ; Compare input with Enter (0x0A)
     MOVI R1, 10
-    CMP R2, R1
+    CMP R14, R1
 
     ; Enter pressed -> exit
     JE EXIT

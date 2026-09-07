@@ -4,12 +4,13 @@
 
 .ORG 0x1000
 
+
 ; ------------------------------------------
 ; Initialisation
 ; ------------------------------------------
 
 MOVI R0, 0x2000     ; R0 = buffer address
-MOVI R1, 0          ; R1 = terminal port 0
+MOVI R1, 0          ; R1 = terminal output port
 MOVI R15, 10        ; R15 = newline
 
 
@@ -19,11 +20,11 @@ MOVI R15, 10        ; R15 = newline
 
 LOOP:
 
-    INP R2, R1
-
-    ; Check if there is no input
-    MOVI R3, 0
-    CMP R2, R3
+    ; R14 is set by the terminal interrupt
+    ;
+    ; Check if there is no character
+    MOVI R2, 0
+    CMP R14, R2
     JE LOOP
 
 
@@ -31,8 +32,8 @@ LOOP:
     ; Check for Enter
     ; --------------------------------------
 
-    MOVI R3, 10
-    CMP R2, R3
+    MOVI R2, 10
+    CMP R14, R2
     JE PRINT
 
 
@@ -40,8 +41,11 @@ LOOP:
     ; Store character in buffer
     ; --------------------------------------
 
-    STOREBIND R0, R2
+    STOREBIND R0, R14
     INC R0
+
+    ; Clear input register
+    MOVI R14, 0
 
     JMP LOOP
 
@@ -51,6 +55,9 @@ LOOP:
 ; ==========================================
 
 PRINT:
+
+    ; Clear input register
+    MOVI R14, 0
 
     ; Null terminate string
     MOVI R2, 0
@@ -97,4 +104,3 @@ DONE:
     OUT R1, R15
 
     HALT
-

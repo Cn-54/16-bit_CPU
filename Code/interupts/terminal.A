@@ -5,46 +5,46 @@
 TERMINAL_IRQ:
 
     ; --------------------------------------
-    ; Save registers that we will modify
+    ; Save registers that we modify
     ; --------------------------------------
 
     PUSH R1
-    PUSH R2
 
 
     ; --------------------------------------
     ; Read character from terminal input
     ; --------------------------------------
 
-    ; Terminal input register = 0
+    ; Terminal input port = 0
     MOVI R1, 0
 
-    ; Read character from INP[0] into R2
-    INP R2, R1
+    ; Read character into R14
+    ;
+    ; R14 is the dedicated terminal input
+    ; register, so we deliberately DO NOT
+    ; push/pop it.
+    INP R14, R1
 
 
     ; --------------------------------------
     ; Output character to terminal
     ; --------------------------------------
 
-    ; Terminal output register = 0
-    MOVI R1, 0
-
-    ; OUT[0] = character
-    OUT R1, R2
+    ; Terminal output port = 0
+    OUT R1, R14
 
 
     ; --------------------------------------
     ; Restore registers
     ; --------------------------------------
 
-    POP R2
     POP R1
 
 
     ; --------------------------------------
     ; Return from interrupt
-    ; Restores:
+    ;
+    ; IRET restores:
     ;   FLAGS
     ;   PC
     ; and re-enables interrupts
