@@ -660,12 +660,32 @@ static int secondPass(const char *input,
             case STOREIND:
             case LOADBIND:
             case STOREBIND:
-            case INP:
-            case OUT:
                 dest = getRegister(t.words[1]);
                 src1 = getRegister(t.words[2]);
 
                 if (dest < 0 || src1 < 0)
+                {
+                    printf("Invalid register\n");
+                    goto error;
+                }
+                break;
+
+            case INP:
+                dest = getRegister(t.words[1]);
+                src1 = getRegister(t.words[2]);
+
+                if (dest < 0 || src1 < 0)
+                {
+                    printf("Invalid register\n");
+                    goto error;
+                }
+                break;
+
+            case OUT:
+                src1 = getRegister(t.words[1]);
+                src2 = getRegister(t.words[2]);
+
+                if (src1 < 0 || src2 < 0)
                 {
                     printf("Invalid register\n");
                     goto error;

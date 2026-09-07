@@ -1,12 +1,48 @@
-.ORG 0x1000
+MOVI R0, 0x2000     ; R0 = buffer address
+MOVI R1, 0          ; R1 = terminal port 0
+MOVI R15, 10        ; R15 IS A NEW LINE
 
-MOVI R0, 0x2000     ; Current buffer position
-MOV R3, R0          ; Save start of buffer
+LOOP:
+    INP R2, R1
 
-SYSCALL 4           ; READLINE
+    MOVI R3, 0
+    CMP R2, R3
+    JE LOOP          ; no input yet
 
-MOVI R0, 0x2000     ; Reset to start of buffer
+    MOVI R3, 10
+    CMP R2, R3
+    JE PRINT         ; Enter
 
-SYSCALL 0           ; PRINT
+    STOREBIND R0, R2 ; store character
+    OUT R1, R2       ; immediately echo character
+    INC R0
+    JMP LOOP
 
-HALT
+
+PRINT:
+    MOVI R2, 0
+    STOREBIND R0, R2 ; null terminate
+
+    MOVI R0, 0x2000  ; reset to beginning of buffer
+
+
+; -------------------------
+; Print the string again
+; -------------------------
+OUT R1, R15 ; print a newline before echoing the text
+PRINT1:
+    LOADBIND R2, R0
+
+    MOVI R3, 0
+    CMP R2, R3
+    JE DONE
+
+    OUT R1, R2
+    INC R0
+    JMP PRINT1
+
+
+DONE:
+    MOVI R2, 10
+    OUT R1, R2
+    HALT

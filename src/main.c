@@ -1,10 +1,16 @@
+#define _DEFAULT_SOURCE
+
 #include "DATA.h"
 #include "cpu.h"
 #include "data.h"
 #include "loader.h"
 #include "memory.h"
+#include "terminal.h"
 #include <stdio.h>
 #include <string.h>
+
+
+#include <unistd.h>
 
 int main(int argc, char *argv[]){
     int debug = 0;
@@ -43,17 +49,25 @@ int main(int argc, char *argv[]){
     Load_Subroutines(mem,SUBROUTINES_START);
     
     // load user program into memory
-    Load_Code(mem,argv[1],PROGRAM_START);
+    Load_Code(mem,program,PROGRAM_START);
 
      if (debug){
         cpu->FLAGS |= FLAG_D;
-    }
+    }   
+
+    init_terminal();
 
     while (!(cpu->FLAGS & FLAG_H)){
+
+        Terminal_Update(cpu);
         FDE(cpu,mem);
+
+        usleep(1000);
+        
     }
     Destroy_CPU(cpu);
     Destroy_Memory(mem);
+    restore_terminal();
 
     return 0;
 }
