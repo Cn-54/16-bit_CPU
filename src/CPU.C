@@ -243,11 +243,11 @@ void FDE(CPU *cpu, Memory *mem){
                 instruction.SRC2;
             break;
         case OUT:
-            cpu->output[cpu->R[instruction.SRC1]] = cpu->R[instruction.SRC2];
+            cpu->OUT[cpu->R[instruction.SRC1]] = cpu->R[instruction.SRC2];
             break;
 
         case INP:
-            cpu->R[instruction.DEST] = cpu->input[cpu->R[instruction.SRC1]];
+            cpu->R[instruction.DEST] = cpu->INP[cpu->R[instruction.SRC1]];
             break;
         default:
             printf(" [!] CPU ERROR: UNKNOWN OPCODE %d",instruction.op);
