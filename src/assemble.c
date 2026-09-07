@@ -81,7 +81,7 @@ static const OpcodeEntry opcodeTable[] = {
     {"RET",       RET},
 
     /* I/O */
-    {"PUTC",      PUTC},
+    {"OUT",      OUT},
     {"INP",      INP}
 };
 
@@ -645,7 +645,7 @@ static int secondPass(const char *input,
             case PUSH:
             case POP:
             case INP:
-            case PUTC:
+            case OUT:
 
                 src1 = getRegister(t.words[1]);
 

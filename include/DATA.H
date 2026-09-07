@@ -6,6 +6,7 @@
 #define MEMORY_SIZE    (1 << 16)  // 64 KiB byte-addressable
 #define MAX_STACK      256
 #define REGISTER_COUNT 16
+#define IO_REGISTER_COUNT 8
 
 #define PAGE_SIZE            256
 #define PAGE_COUNT           256

@@ -49,7 +49,7 @@ typedef enum {
     RET      = 0x56,
 
     // IO
-    PUTC     = 0x60,
+    OUT      = 0x60,
     INP      = 0x61,
 
 } Opcode;

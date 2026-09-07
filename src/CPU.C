@@ -211,12 +211,6 @@ void FDE(CPU *cpu, Memory *mem){
         case DEC:
             cpu->R[instruction.DEST] --;
             break;
-        case PUTC:
-
-            putchar((char)cpu->R[instruction.SRC1]);
-            fflush(stdout);
-            break;
-
         case LOADIND:
             cpu->R[instruction.DEST] =
                 load_word(mem, cpu->R[instruction.SRC1]);
@@ -248,8 +242,12 @@ void FDE(CPU *cpu, Memory *mem){
                 ((uint16_t)instruction.SRC1 << 8) |
                 instruction.SRC2;
             break;
+        case OUT:
+            cpu->output[cpu->R[instruction.SRC1]] = cpu->R[instruction.SRC2];
+            break;
+
         case INP:
-            cpu->R[instruction.SRC1] = (uint16_t)getchar();
+            cpu->R[instruction.DEST] = cpu->input[cpu->R[instruction.SRC1]];
             break;
         default:
             printf(" [!] CPU ERROR: UNKNOWN OPCODE %d",instruction.op);
