@@ -4,7 +4,7 @@
 ; READ FIRST NUMBER
 ; ==========================================
 
-MOVI R0, PROMPT1
+MOVI R0, PROMPT
 SYSCALL 0
 
 MOVI R0, 0x2000
@@ -21,7 +21,7 @@ MOV R5, R0
 ; READ SECOND NUMBER
 ; ==========================================
 
-MOVI R0, PROMPT2
+MOVI R0, PROMPT
 SYSCALL 0
 
 MOVI R0, 0x2000
@@ -69,12 +69,8 @@ JMP END
 ; DATA
 ; ==========================================
 
-PROMPT1:
-    DB "Enter first number: "
-    DB 0
-
-PROMPT2:
-    DB "Enter second number: "
+PROMPT:
+    DB "Enter a number: "
     DB 0
 
 RESULT:
