@@ -2,7 +2,7 @@
 
 A simple 16-bit CPU emulator written in C.
 
-The project includes a custom instruction set, assembler, byte-addressable memory, stack, vector table, and a small set of assembly subroutines.
+The project includes a custom instruction set, assembler, byte-addressable memory, stack, vector tables, system calls, hardware interrupts, and a small set of assembly subroutines.
 
 ## Features
 
@@ -12,32 +12,34 @@ The project includes a custom instruction set, assembler, byte-addressable memor
 * 32-bit fixed-size instructions
 * Stack with `PUSH`, `POP`, `CALL` and `RET`
 * Custom assembler with labels, `.ORG` and `DB`
-* Vector table and system calls
+* Vector tables for system calls and hardware interrupts
 * Assembly subroutines for `PRINT`, `STRLEN`, `ATOI` and `ITOA`
+* Hardware terminal interrupt handler for text input and output
+* Interrupt support with `IRET`
 
 See the [ISA documentation](Docs/ISA.md) for the full instruction set and architecture.
 
 ## Usage
 
-Build the CPU:
+### Build the CPU
 
 ```bash
 make cpu
 ```
 
-Build the assembler:
+### Build the assembler
 
 ```bash
 make assembler
 ```
 
-Assemble a program:
+### Assemble a program
 
 ```bash
 ./bin/assembler Code/programs/program.A Code/programs/program.bin
 ```
 
-Run a program:
+### Run a program
 
 ```bash
 ./bin/cpu Code/programs/program.bin
@@ -64,7 +66,9 @@ Run a program:
 │   │   ├── strlen
 │   │   │   ├── strlen.A
 │   │   │   └── strlen.bin
-│   │   └── subroutine
+│   │   └── readline
+│   │       ├── readline.A
+│   │       └── readline.bin
 │   └── vector_table
 │       ├── vec_table.bin
 │       └── vec_table.hex
