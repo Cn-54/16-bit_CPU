@@ -1,23 +1,53 @@
+; ==========================================
+; Terminal Interrupt Handler
+; ==========================================
+
 TERMINAL_IRQ:
+
+    ; --------------------------------------
+    ; Save registers that we will modify
+    ; --------------------------------------
+
     PUSH R1
     PUSH R2
 
+
+    ; --------------------------------------
+    ; Read character from terminal input
+    ; --------------------------------------
+
+    ; Terminal input register = 0
     MOVI R1, 0
+
+    ; Read character from INP[0] into R2
     INP R2, R1
 
-    MOVI R1, 10
-    CMP R2, R1
-    JE EXIT
 
+    ; --------------------------------------
+    ; Output character to terminal
+    ; --------------------------------------
+
+    ; Terminal output register = 0
     MOVI R1, 0
+
+    ; OUT[0] = character
     OUT R1, R2
 
+
+    ; --------------------------------------
+    ; Restore registers
+    ; --------------------------------------
+
     POP R2
     POP R1
+
+
+    ; --------------------------------------
+    ; Return from interrupt
+    ; Restores:
+    ;   FLAGS
+    ;   PC
+    ; and re-enables interrupts
+    ; --------------------------------------
 
     IRET
-
-EXIT:
-    POP R2
-    POP R1
-    HALT
