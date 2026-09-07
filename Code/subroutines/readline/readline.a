@@ -1,37 +1,58 @@
+; ==========================================
+; READLINE
+;
+; Reads a line from the terminal into a
+; null-terminated buffer.
+;
+; Input:
+;   R0  = buffer address
+;   R14 = terminal input character
+;
+; Output:
+;   R0  = address immediately after '\0'
+;   R14 = 0
+;
+; Behaviour:
+;   - Waits for a character in R14
+;   - Stores characters into the buffer
+;   - Enter (ASCII 10) terminates the line
+;   - Adds a null terminator
+;
+; The terminal interrupt handler is responsible
+; for reading and echoing the character.
+; ==========================================
+
 READLINE:
-    MOVI R1, 0          ; terminal port
-    MOVI R3, 0          ; zero
 
-READ_LOOP:
-    INP R2, R1
+WAIT:
+    ; Wait for terminal input
+    MOVI R1, 0
+    CMP R14, R1
+    JE WAIT
 
-    CMP R2, R3
-    JE READ_LOOP        ; no input
+    ; Check for Enter
+    MOVI R1, 10
+    CMP R14, R1
+    JE DONE
 
-    MOVI R4, 10
-    CMP R2, R4
-    JE READ_DONE
+    ; Store character in buffer
+    STOREBIND R0, R14
 
-    MOVI R4, 8
-    CMP R2, R4
-    JE BACKSPACE
-
-    MOVI R4, 127
-    CMP R2, R4
-    JE BACKSPACE
-
-    STOREBIND R0, R2
-    OUT R1, R2          ; echo character
+    ; Advance buffer
     INC R0
 
-    JMP READ_LOOP
+    ; Mark R14 as consumed
+    MOVI R14, 0
+
+    JMP WAIT
 
 
-BACKSPACE:
-    ; handle backspace here
-    JMP READ_LOOP
+DONE:
+    ; Null terminate string
+    MOVI R1, 0
+    STOREBIND R0, R1
 
+    ; Mark Enter as consumed
+    MOVI R14, 0
 
-READ_DONE:
-    STOREBIND R0, R3
     RET

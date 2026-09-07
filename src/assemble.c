@@ -317,7 +317,7 @@ static int getLineSize(Tokens *t)
                 size++;
             }
 
-            return size + 1;
+            return size ;
         }
 
         return 1;
@@ -505,7 +505,6 @@ static void emitDB(FILE *out, Tokens *t)
             p++;
         }
 
-        fputc('\0', out);
     }
     else
     {
