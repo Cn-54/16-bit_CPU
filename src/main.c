@@ -45,8 +45,9 @@ int main(int argc, char *argv[]){
     // load vector table into memory
     Load_Code(mem, "Code/vector_table/vec_table.bin", VECTORTABLE_START);
 
-    // load subroutines into memory
+    // load subroutines and interupt handlers into memory
     Load_Subroutines(mem,SUBROUTINES_START);
+    Load_INTR_Handlers(mem, SUBROUTINES_START);
     
     // load user program into memory
     Load_Code(mem,program,PROGRAM_START);
@@ -60,6 +61,10 @@ int main(int argc, char *argv[]){
     while (!(cpu->FLAGS & FLAG_H)){
 
         Terminal_Update(cpu);
+
+        if (Check_Interrupts(cpu, mem))
+            continue;
+
         FDE(cpu,mem);
 
         usleep(1000);

@@ -16,6 +16,10 @@ CPU *Create_CPU(void){
     cpu->SP = 0xFFFF;
     cpu->FLAGS = 0;
 
+    cpu->INTR_ENABLED = 1;
+    cpu->INTR_PENDING = 0;
+
+
     return cpu;
 }
 
@@ -56,6 +60,42 @@ static void Debug_Instruction(CPU *cpu, INS *instruction){
     printf("]\n");
 }
 
+
+static void push_word(CPU *cpu, Memory *mem, uint16_t value){
+    cpu->SP -= 2;
+    store_word(mem, cpu->SP, value);
+}
+
+static uint16_t pop_word(CPU *cpu, Memory *mem){
+    uint16_t value = load_word(mem, cpu->SP);
+    cpu->SP += 2;
+    return value;
+}
+
+int Check_Interrupts(CPU *cpu, Memory *mem){
+    if (!cpu->INTR_ENABLED)
+        return 0;
+
+    if (!(cpu->INTR_PENDING & (1 << INTR_TERM)))
+        return 0;
+
+    cpu->INTR_PENDING &= ~(1 << INTR_TERM);
+
+    push_word(cpu, mem, cpu->PC);
+    push_word(cpu, mem, cpu->FLAGS);
+
+    cpu->INTR_ENABLED = 0;
+
+    cpu->PC =
+        load_word(
+            mem,
+            INTR_TABLE_START + (INTR_TERM * 2)
+        );
+
+    return 1;
+}
+
+
 void FDE(CPU *cpu, Memory *mem){
     INS instruction;
 
@@ -84,17 +124,13 @@ void FDE(CPU *cpu, Memory *mem){
         case HALT:
             cpu->FLAGS |= FLAG_H;
             break;
-        case SYSCALL: {
-            cpu->SP -= WORD_SIZE;
+        case SYSCALL:{
+            push_word(cpu, mem, cpu->PC);
 
-            uint16_t return_address = cpu->PC;
+            uint16_t vector_address =
+                instruction.SRC1 * WORD_SIZE;
 
-            store_word(mem, cpu->SP, return_address);
-
-            uint16_t vector_address = instruction.SRC1 * WORD_SIZE;
-            uint16_t handler = load_word(mem, vector_address);
-
-            cpu->PC = handler;
+            cpu->PC = load_word(mem, vector_address);
             break;
         }
         case MOV:
@@ -107,12 +143,11 @@ void FDE(CPU *cpu, Memory *mem){
             store_word(mem, addressA, cpu->R[instruction.SRC2]);
             break;
         case PUSH:
-            cpu->SP -= 2;
-            store_word(mem, cpu->SP, cpu->R[instruction.SRC1]);
+            push_word(cpu, mem, cpu->R[instruction.SRC1]);
             break;
+
         case POP:
-            cpu->R[instruction.SRC1] = load_word(mem, cpu->SP);
-            cpu->SP += 2;
+            cpu->R[instruction.SRC1] = pop_word(cpu, mem);
             break;
         case ADD:
             cpu->R[instruction.DEST] = cpu->R[instruction.SRC1] + cpu->R[instruction.SRC2];
@@ -181,24 +216,15 @@ void FDE(CPU *cpu, Memory *mem){
             break;
         }
         case CALL:{
-
-            cpu->SP -= WORD_SIZE;
-
-            store_word(mem, cpu->SP, cpu->PC);
-
-            cpu->PC +=  (int16_t)addressB;
-
+            push_word(cpu, mem, cpu->PC);
+            cpu->PC += (int16_t)addressB;
             break;
         }
 
-        case RET:{
-            uint16_t return_address = load_word(mem, cpu->SP);
-
-            cpu->SP += WORD_SIZE;
-            cpu->PC = return_address;
-
+        case RET:
+            cpu->PC = pop_word(cpu, mem);
             break;
-        }
+
         case LOADB:
             cpu->R[instruction.DEST] = load_byte(mem, addressB);
             break;
@@ -251,6 +277,14 @@ void FDE(CPU *cpu, Memory *mem){
 
             cpu->INP[cpu->R[instruction.SRC1]] = 0;
             break;
+        case IRET:{
+            cpu->FLAGS = pop_word(cpu, mem);
+            cpu->PC = pop_word(cpu, mem);
+
+            cpu->INTR_ENABLED = 1;
+
+            break;
+        }
         default:
             printf(" [!] CPU ERROR: UNKNOWN OPCODE %d",instruction.op);
             cpu->FLAGS |= FLAG_H;

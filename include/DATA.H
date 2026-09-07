@@ -24,5 +24,8 @@
 #define VECTORTABLE_START 0x0000
 #define SUBROUTINES_START 0x0100
 #define PROGRAM_START     0x1000
+#define INTR_TABLE_START  0x000A
+
+#define INTR_TERM 0
 
 #endif

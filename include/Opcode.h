@@ -47,6 +47,7 @@ typedef enum {
     JL       = 0x54,
     CALL     = 0x55,
     RET      = 0x56,
+    IRET     = 0x57,
 
     // IO
     OUT      = 0x60,

@@ -34,16 +34,15 @@ void restore_terminal(){
 }
 
 void Terminal_Update(CPU *cpu){
-    // CPU -> terminal
+    // CPU to terminal
     if (cpu->OUT[TERMINAL_OUT] != 0)
     {
         putchar((char)cpu->OUT[TERMINAL_OUT]);
         fflush(stdout);
-
         cpu->OUT[TERMINAL_OUT] = 0;
     }
 
-    // terminal -> CPU
+    // terminal to CPU
     if (cpu->INP[TERMINAL_IN] == 0)
     {
         fd_set set;
@@ -62,6 +61,9 @@ void Terminal_Update(CPU *cpu){
             if (read(STDIN_FILENO, &c, 1) == 1)
             {
                 cpu->INP[TERMINAL_IN] = c;
+
+                // Raise terminal interrupt
+                cpu->INTR_PENDING |= (1 << INTR_TERM);
             }
         }
     }

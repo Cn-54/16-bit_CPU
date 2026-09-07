@@ -26,3 +26,7 @@ void Load_Subroutines(Memory *mem, uint16_t address){
     Load_Code(mem, "Code/subroutines/itoa/itoa.bin", address*4);
     Load_Code(mem, "Code/subroutines/readline/readline.bin", address*5);
 }
+
+void Load_INTR_Handlers(Memory *mem, uint16_t address){
+    Load_Code(mem, "Code/interupts/terminal.bin", address*6);
+}

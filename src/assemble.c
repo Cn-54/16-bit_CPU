@@ -79,6 +79,7 @@ static const OpcodeEntry opcodeTable[] = {
     {"JL",        JL},
     {"CALL",      CALL},
     {"RET",       RET},
+    {"IRET",       IRET},
 
     /* I/O */
     {"OUT",      OUT},
@@ -621,6 +622,7 @@ static int secondPass(const char *input,
             case NOP:
             case HALT:
             case RET:
+            case IRET:
                 break;
 
 

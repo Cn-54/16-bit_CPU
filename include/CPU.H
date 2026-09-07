@@ -12,11 +12,16 @@ typedef struct cpu {
     uint16_t FLAGS;                 // Status flags
     uint16_t SP;                    // Stack pointer
     uint16_t PC;                    // Program counter
+
+    uint8_t INTR_PENDING;          // pending interupt
+    uint8_t INTR_ENABLED;          // interupts enabled
 } CPU;
 
 CPU *Create_CPU(void);
 void Destroy_CPU(CPU *cpu);
 
 void FDE(CPU *cpu,Memory *mem);
+
+int Check_Interrupts(CPU *cpu, Memory *mem);
 
 #endif

@@ -1,0 +1,23 @@
+TERMINAL_IRQ:
+    PUSH R1
+    PUSH R2
+
+    MOVI R1, 0
+    INP R2, R1
+
+    MOVI R1, 10
+    CMP R2, R1
+    JE EXIT
+
+    MOVI R1, 0
+    OUT R1, R2
+
+    POP R2
+    POP R1
+
+    IRET
+
+EXIT:
+    POP R2
+    POP R1
+    HALT
