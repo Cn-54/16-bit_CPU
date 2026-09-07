@@ -928,6 +928,35 @@ R1 = string address
 
 ---
 
+## READLINE
+
+```text
+SYSCALL 4
+```
+
+Reads a line of ASCII input from the terminal into a null-terminated string.
+
+### Input
+
+```text
+R0 = destination buffer
+```
+
+### Output
+
+```text
+R0 = address immediately after the string
+```
+
+**Behaviour**
+
+* Reads characters supplied by the terminal interrupt handler.
+* Stores characters sequentially in the destination buffer.
+* ASCII `10` (`'\n'`) terminates the input.
+* Appends a null terminator (`0x00`) to the string.
+* The terminal interrupt handler is responsible for receiving and echoing characters.
+
+
 # Instruction Syntax
 
 ## Register Operations
