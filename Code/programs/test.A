@@ -1,0 +1,94 @@
+.ORG 0x1000
+
+; ==========================================
+; READ FIRST NUMBER
+; ==========================================
+
+MOVI R0, PROMPT1
+SYSCALL 0
+
+MOVI R0, 0x2000
+SYSCALL 4
+
+MOVI R0, 0x2000
+SYSCALL 2
+
+; Save first number
+MOV R5, R0
+
+
+; ==========================================
+; READ SECOND NUMBER
+; ==========================================
+
+MOVI R0, PROMPT2
+SYSCALL 0
+
+MOVI R0, 0x2000
+SYSCALL 4
+
+MOVI R0, 0x2000
+SYSCALL 2
+
+; R5 = first number
+; R0 = second number
+
+ADD R0, R5, R0
+
+; Save result
+MOV R5, R0
+
+
+; ==========================================
+; PRINT RESULT
+; ==========================================
+
+MOVI R0, RESULT
+SYSCALL 0
+
+; Convert result to ASCII string
+; R0 = number
+; R1 = destination buffer
+
+MOV R0, R5
+MOVI R1, 0x2100
+SYSCALL 3
+
+; Print converted result
+MOVI R0, 0x2100
+SYSCALL 0
+
+; Print newline
+MOVI R0, NEWLINE
+SYSCALL 0
+
+JMP END
+
+
+; ==========================================
+; DATA
+; ==========================================
+
+PROMPT1:
+    DB "Enter first number: "
+    DB 0
+
+PROMPT2:
+    DB "Enter second number: "
+    DB 0
+
+RESULT:
+    DB "Result: "
+    DB 0
+
+NEWLINE:
+    DB "\n"
+    DB 0
+
+
+; ==========================================
+; END
+; ==========================================
+
+END:
+    HALT

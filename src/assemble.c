@@ -90,7 +90,21 @@ static const OpcodeEntry opcodeTable[] = {
 static Label labels[MAX_LABELS];
 static int labelCount = 0;
 
+static char *find_label_colon(char *line)
+{
+    int quoted = 0;
 
+    for (char *p = line; *p; p++)
+    {
+        if (*p == '"' && (p == line || p[-1] != '\\'))
+            quoted = !quoted;
+
+        if (*p == ':' && !quoted)
+            return p;
+    }
+
+    return NULL;
+}
 
 static void trim(char *str)
 {
@@ -145,9 +159,15 @@ static Tokens tokenise(char line[])
 
     while (*p && t.count < 4)
     {
-        /* Skip separators */
-        while (*p == ' ' || *p == ',' || *p == '\t')
+        /* Skip whitespace and commas */
+        while (*p == ' ' ||
+               *p == '\t' ||
+               *p == '\r' ||
+               *p == '\n' ||
+               *p == ',')
+        {
             p++;
+        }
 
         if (*p == '\0')
             break;
@@ -177,12 +197,16 @@ static Tokens tokenise(char line[])
         else
         {
             /* Normal token */
-            t.words[t.count++] = p;
+            t.words[t.count] = p;
+            t.quoted[t.count] = 0;
+            t.count++;
 
             while (*p &&
                    *p != ' ' &&
-                   *p != ',' &&
-                   *p != '\t')
+                   *p != '\t' &&
+                   *p != '\r' &&
+                   *p != '\n' &&
+                   *p != ',')
             {
                 p++;
             }
@@ -193,7 +217,6 @@ static Tokens tokenise(char line[])
                 p++;
             }
 
-            /* Uppercase normal token */
             for (char *c = t.words[t.count - 1]; *c; c++)
                 *c = toupper((unsigned char)*c);
         }
@@ -201,6 +224,7 @@ static Tokens tokenise(char line[])
 
     return t;
 }
+
 
 static Opcode getOpcode(const char *str)
 {
@@ -280,6 +304,7 @@ static int addLabel(const char *name, int address)
 
     return 1;
 }
+
 
 
 static int getLineSize(Tokens *t)
@@ -385,7 +410,7 @@ static int firstPass(const char *input)
             continue;
 
 
-        char *colon = strchr(line, ':');
+        char *colon = find_label_colon(line);
 
         if (colon)
         {
@@ -400,7 +425,6 @@ static int firstPass(const char *input)
                 return 0;
             }
 
-
             for (char *c = line; *c; c++)
                 *c = toupper((unsigned char)*c);
 
@@ -410,18 +434,22 @@ static int firstPass(const char *input)
                 return 0;
             }
 
-
             char *instruction = colon + 1;
-
             trim(instruction);
 
             if (*instruction == '\0')
                 continue;
 
-            strcpy(line, instruction);
+            /*
+            * Move the instruction to the beginning of line.
+            */
+            size_t len = strlen(instruction);
+            memmove(line, instruction, len + 1);
         }
 
         Tokens t = tokenise(line);
+        if (t.count == 0)
+            continue;
 
         if (isOrg(&t))
         {
@@ -549,21 +577,29 @@ static int secondPass(const char *input,
         if (line[0] == '\0')
             continue;
 
-        char *colon = strchr(line, ':');
+        char *colon = find_label_colon(line);
 
         if (colon)
         {
             char *instruction = colon + 1;
-
             trim(instruction);
 
             if (*instruction == '\0')
                 continue;
 
-            strcpy(line, instruction);
+            memmove(line, instruction, strlen(instruction) + 1);
         }
 
+
         Tokens t = tokenise(line);
+
+
+        for (int i = 0; i < t.count; i++)
+        {
+            printf(" [%s]", t.words[i] ? t.words[i] : "(null)");
+        }
+
+        printf("\n");
 
         if (isOrg(&t)){
             int org = getValue(t.words[1]);
@@ -633,7 +669,13 @@ static int secondPass(const char *input,
 
                 if (dest < 0)
                 {
-                    printf("Invalid register\n");
+                    printf(
+            "Invalid register: %s %s %s %s\n",
+            t.words[0],
+            t.words[1],
+            t.words[2],
+            t.words[3]
+        );
                     goto error;
                 }
 
@@ -648,7 +690,13 @@ static int secondPass(const char *input,
 
                 if (src1 < 0)
                 {
-                    printf("Invalid register\n");
+                    printf(
+            "Invalid register: %s %s %s %s\n",
+            t.words[0],
+            t.words[1],
+            t.words[2],
+            t.words[3]
+        );
                     goto error;
                 }
 
@@ -666,7 +714,13 @@ static int secondPass(const char *input,
 
                 if (dest < 0 || src1 < 0)
                 {
-                    printf("Invalid register\n");
+                    printf(
+            "Invalid register: %s %s %s %s\n",
+            t.words[0],
+            t.words[1],
+            t.words[2],
+            t.words[3]
+        );
                     goto error;
                 }
                 break;
@@ -677,7 +731,13 @@ static int secondPass(const char *input,
 
                 if (dest < 0 || src1 < 0)
                 {
-                    printf("Invalid register\n");
+                    printf(
+            "Invalid register: %s %s %s %s\n",
+            t.words[0],
+            t.words[1],
+            t.words[2],
+            t.words[3]
+        );
                     goto error;
                 }
                 break;
@@ -688,7 +748,13 @@ static int secondPass(const char *input,
 
                 if (src1 < 0 || src2 < 0)
                 {
-                    printf("Invalid register\n");
+                    printf(
+            "Invalid register: %s %s %s %s\n",
+            t.words[0],
+            t.words[1],
+            t.words[2],
+            t.words[3]
+        );
                     goto error;
                 }
                 break;
@@ -701,7 +767,13 @@ static int secondPass(const char *input,
 
                 if (src1 < 0 || src2 < 0)
                 {
-                    printf("Invalid register\n");
+                    printf(
+            "Invalid register: %s %s %s %s\n",
+            t.words[0],
+            t.words[1],
+            t.words[2],
+            t.words[3]
+        );
                     goto error;
                 }
 
@@ -724,7 +796,13 @@ static int secondPass(const char *input,
 
                 if (dest < 0 || src1 < 0 || src2 < 0)
                 {
-                    printf("Invalid register\n");
+                    printf(
+            "Invalid register: %s %s %s %s\n",
+            t.words[0],
+            t.words[1],
+            t.words[2],
+            t.words[3]
+        );
                     goto error;
                 }
 
@@ -739,7 +817,13 @@ static int secondPass(const char *input,
 
                 if (dest < 0)
                 {
-                    printf("Invalid register\n");
+                    printf(
+            "Invalid register: %s %s %s %s\n",
+            t.words[0],
+            t.words[1],
+            t.words[2],
+            t.words[3]
+        );
                     goto error;
                 }
 
@@ -770,7 +854,13 @@ static int secondPass(const char *input,
 
                 if (dest < 0)
                 {
-                    printf("Invalid register\n");
+                    printf(
+            "Invalid register: %s %s %s %s\n",
+            t.words[0],
+            t.words[1],
+            t.words[2],
+            t.words[3]
+        );
                     goto error;
                 }
 
@@ -818,7 +908,13 @@ static int secondPass(const char *input,
 
                 if (src2 < 0)
                 {
-                    printf("Invalid register\n");
+                    printf(
+            "Invalid register: %s %s %s %s\n",
+            t.words[0],
+            t.words[1],
+            t.words[2],
+            t.words[3]
+        );
                     goto error;
                 }
 
@@ -834,7 +930,13 @@ static int secondPass(const char *input,
 
                 if (dest < 0)
                 {
-                    printf("Invalid register\n");
+                    printf(
+            "Invalid register: %s %s %s %s\n",
+            t.words[0],
+            t.words[1],
+            t.words[2],
+            t.words[3]
+        );
                     goto error;
                 }
 
@@ -882,7 +984,13 @@ static int secondPass(const char *input,
 
                 if (src2 < 0)
                 {
-                    printf("Invalid register\n");
+                    printf(
+            "Invalid register: %s %s %s %s\n",
+            t.words[0],
+            t.words[1],
+            t.words[2],
+            t.words[3]
+        );
                     goto error;
                 }
 
@@ -899,7 +1007,13 @@ static int secondPass(const char *input,
 
                 if (dest < 0 || src1 < 0)
                 {
-                    printf("Invalid register\n");
+                    printf(
+            "Invalid register: %s %s %s %s\n",
+            t.words[0],
+            t.words[1],
+            t.words[2],
+            t.words[3]
+        );
                     goto error;
                 }
 
