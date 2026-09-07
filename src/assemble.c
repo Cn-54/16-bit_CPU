@@ -628,7 +628,6 @@ static int secondPass(const char *input,
 
             case INC:
             case DEC:
-
                 dest = getRegister(t.words[1]);
 
                 if (dest < 0)
@@ -644,9 +643,6 @@ static int secondPass(const char *input,
 
             case PUSH:
             case POP:
-            case INP:
-            case OUT:
-
                 src1 = getRegister(t.words[1]);
 
                 if (src1 < 0)
@@ -659,13 +655,13 @@ static int secondPass(const char *input,
 
 
             /* Two registers */
-
             case MOV:
             case LOADIND:
             case STOREIND:
             case LOADBIND:
             case STOREBIND:
-
+            case INP:
+            case OUT:
                 dest = getRegister(t.words[1]);
                 src1 = getRegister(t.words[2]);
 
@@ -674,7 +670,6 @@ static int secondPass(const char *input,
                     printf("Invalid register\n");
                     goto error;
                 }
-
                 break;
 
 
